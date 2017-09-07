@@ -1,0 +1,35 @@
+<#macro view_attribute attribute_key >
+	<#if identity.attributes[attribute_key]?has_content>
+		<#assign attribute = identity.attributes[attribute_key] />
+	<div class="form-group">
+		<label class="control-label" for="${attribute_key}" >#i18n{identitystoreagent.attr_label.${attribute_key}} :</label>
+		
+		<#if identity_reference_list[attribute_key]?has_content>
+			<#if viewMode>
+				<@comboWithParams name=attribute_key default_value=attribute.value additionalParameters=" id=\"attribute_key\" class=\"form-control\" disabled" items=identity_reference_list[attribute_key] />
+			<#else>							
+				<@comboWithParams name=attribute_key default_value=attribute.value additionalParameters=" id=\"attribute_key\" class=\"form-control\" " items=identity_reference_list[attribute_key]  />
+			</#if>
+		<#else>
+			<input class="form-control input-sm" type="text" id="${attribute_key}" name="${attribute_key}" value="${attribute.value!''}" <#if viewMode>readonly</#if>>
+		</#if>
+		<#if attribute.certificate?has_content >
+        <span><i class="fa fa-check-circle fa-lg" style="color:green"></i> #i18n{identitystoreagent.certificate.certified_by} ${attribute.certificate.certifierName!''} <#if attribute.certificate.certificateExpirationDate??> #i18n{identitystoreagent.certificate.until} : ${attribute.certificate.certificateExpirationDate?date!''}</#if></span>
+        </#if>
+    </div>
+    <#else>
+	<div class="form-group">
+		<label class="control-label" for="${attribute_key}" >#i18n{identitystoreagent.attr_label.${attribute_key}} :</label>
+		
+		<#if identity_reference_list[attribute_key]?has_content>
+			<#if viewMode>
+				<@comboWithParams name=attribute_key default_value="" additionalParameters=" id=\"attribute_key\" class=\"form-control\" disabled" items=identity_reference_list[attribute_key] />
+			<#else>							
+				<@comboWithParams name=attribute_key default_value="" additionalParameters=" id=\"attribute_key\" class=\"form-control\" " items=identity_reference_list[attribute_key]  />
+			</#if>
+		<#else>
+			<input class="form-control input-sm" type="text" id="${attribute_key}" name="${attribute_key}" value="" <#if viewMode>readonly</#if>>
+		</#if>
+    </div>    	
+    </#if>         
+</#macro>

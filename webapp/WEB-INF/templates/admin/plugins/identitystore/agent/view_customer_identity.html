@@ -1,0 +1,40 @@
+<#include "include/identity_utils.html" />
+
+<@rowBox>
+	<@boxBody>    
+    <@messages errors=errors />
+    <@messages infos=infos />
+	
+	<#if ! viewMode?has_content>
+		<#assign viewMode=true />
+	</#if>
+	
+	<#if identity?has_content>	
+		<#if viewMode>
+	<form class="form-horizontal" method="post" action="jsp/admin/plugins/identitystore/agent/ManageCustomerIdentity.jsp?plugin_name=identitystoreagent&view=customerIdentity">
+		<#else>
+	<form class="form-horizontal" method="post" action="jsp/admin/plugins/identitystore/agent/ManageCustomerIdentity.jsp?plugin_name=identitystoreagent&action=customerIdentity">
+		</#if>
+		<#assign count_mod=0 />
+		<#list identity_attr_list as attr_key>
+			<#if count_mod=0>
+		<div class="row">
+			</#if>
+			<div class="col-xs-12 col-sm-5 col-sm-offset-1">
+				<@view_attribute attribute_key=attr_key />
+			</div>
+			<#assign count_mod=count_mod+1 />
+			<#if count_mod=2>
+			<#assign count_mod=0 />
+		</div>
+			</#if>
+		</#list>
+		<#if count_mod=1>
+		</div>
+		</#if>
+	</form>
+	
+	</#if>
+	
+	</@boxBody>
+</@rowBox>
