@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><plug-in>
+    <name>identitystoreagent</name>
+    <class>fr.paris.lutece.plugins.identitystoreagent.IdentityStoreAgentPlugin</class>
+    <version>1.0.0-SNAPSHOT</version>
+    <documentation/>
+    <installation/>
+    <changes/>
+    <user-guide/>
+    <description>identitystoreagent.module.description</description>
+    <provider>identitystoreagent.module.provider</provider>
+    <provider-url>http://dev.lutece.paris.fr</provider-url>
+    <icon-url>images/admin/skin/feature_default_icon</icon-url>
+    <copyright>Copyright (c) 2017 Mairie de Paris</copyright>
+    
+    <!-- if the plugin must have a connection pool with parameter : 1 - yes, 0 - no -->
+    <db-pool-required>0</db-pool-required>
+
+    <!-- Admin features parameters -->
+    <admin-features>
+        <admin-feature>
+            <feature-id>AGENT_IDS_MANAGEMENT</feature-id>
+            <feature-title>identitystoreagent.adminFeature.ManageCustomerIdentity.name</feature-title>
+            <feature-description>identitystoreagent.adminFeature.ManageCustomerIdentity.description</feature-description>
+            <feature-level>0</feature-level>
+            <feature-url>jsp/admin/plugins/identitystore/agent/ManageCustomerIdentity.jsp</feature-url>
+            <feature-icon-url/>
+        </admin-feature>
+    </admin-features>
+    
+    <!-- RBAC Resources -->
+    <rbac-resource-types>
+        <rbac-resource-type>
+            <rbac-resource-type-class>
+                fr.paris.lutece.plugins.identitystoreagent.service.IdentityAgentManagementResourceIdService
+            </rbac-resource-type-class>
+        </rbac-resource-type>
+    </rbac-resource-types>
+    
+</plug-in>
