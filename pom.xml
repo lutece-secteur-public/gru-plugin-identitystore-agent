@@ -11,7 +11,7 @@
     <artifactId>plugin-identitystore-agent</artifactId>
     <packaging>lutece-plugin</packaging>
     <version>1.0.0-SNAPSHOT</version>
-    <name>Lutece identitystore agent module</name>
+    <name>Lutece identitystore agent plugin</name>
 
     <repositories>
         <repository>
