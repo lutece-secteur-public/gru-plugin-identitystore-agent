@@ -71,6 +71,7 @@ public class ManageCustomerIdentityJspBean extends MVCAdminJspBean
     private static final String VIEW_MODIFY_IDENTITY = "modifyIdentity";
     private static final String ACTION_MODIFY_IDENTITY = "modifyIdentity";
     private static final String INFO_IDENTITY_UPDATED = "identitystoreagent.info.identity.updated";
+    private static final String INFO_IDENTITY_NOT_UPDATED = "identitystoreagent.info.identity.not_updated";
     private static final String ERROR_IDENTITY_NOT_FOUND = "identitystoreagent.error.identity.not_found";
     private static final String ERROR_IDENTITY_LATER = "identitystoreagent.error.identity.later";
     private static final long serialVersionUID = 1L;
@@ -206,8 +207,15 @@ public class ManageCustomerIdentityJspBean extends MVCAdminJspBean
             mapParameters.put( IdentityConstants.PARAMETER_CUSTOMER_ID, _strCustomerId );
             try
             {
-                IdentityUtils.updateIdentity( _strConnectionId, _strCustomerId, getUser( ), _listAttributRight, request );
-                addInfo( INFO_IDENTITY_UPDATED, getLocale( ) );
+                boolean bUpdated = IdentityUtils.updateIdentity( _strConnectionId, _strCustomerId, getUser( ), _listAttributRight, request );
+                if ( bUpdated )
+                {
+                    addInfo( INFO_IDENTITY_UPDATED, getLocale( ) );
+                }
+                else
+                {
+                    addInfo( INFO_IDENTITY_NOT_UPDATED, getLocale( ) );
+                }
             }
             catch( Exception e )
             {

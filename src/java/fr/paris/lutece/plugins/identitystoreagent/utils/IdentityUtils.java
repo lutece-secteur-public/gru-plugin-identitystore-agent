@@ -128,13 +128,15 @@ public final class IdentityUtils
         identityChange.setAuthor( author );
 
         IdentityDto identityBase = getIdentity( strConnectionId, strCustomerId );
+        if ( identityBase == null )
+        {
+            return false;
+        }
         IdentityDto identityUpdate = new IdentityDto( );
         identityUpdate.setAttributes( new HashMap<String, AttributeDto>( ) );
-        if ( identityBase != null )
-        {
-            identityUpdate.setConnectionId( identityBase.getConnectionId( ) );
-            identityUpdate.setCustomerId( identityBase.getCustomerId( ) );
-        }
+        identityUpdate.setConnectionId( identityBase.getConnectionId( ) );
+        identityUpdate.setCustomerId( identityBase.getCustomerId( ) );
+
         if ( identityBase.getAttributes( ) != null )
         {
             for ( AppRightDto appRight : listAttributRight )
