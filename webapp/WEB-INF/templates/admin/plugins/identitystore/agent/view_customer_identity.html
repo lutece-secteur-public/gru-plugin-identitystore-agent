@@ -1,27 +1,30 @@
 <#include "include/identity_utils.html" />
 
 <@rowBox>
+	<#if ! viewMode?has_content>
+		<#assign viewMode=true />
+	</#if>	
+	<#assign formAction="jsp/admin/plugins/identitystore/agent/ManageCustomerIdentity.jsp?plugin_name=identitystoreagent&action=modifyIdentity" />
+	<#if viewMode>
+		<#assign formAction="jsp/admin/plugins/identitystore/agent/ManageCustomerIdentity.jsp?plugin_name=identitystoreagent&view=modifyIdentity" />
+	</#if>
+	<@tform action=formAction>
 	<@boxBody>    
     <@messages errors=errors />
     <@messages infos=infos />
-	
-	<#if ! viewMode?has_content>
-		<#assign viewMode=true />
-	</#if>
-	
-	<#if identity?has_content>	
-		<#if viewMode>
-	<form class="form-horizontal" method="post" action="jsp/admin/plugins/identitystore/agent/ManageCustomerIdentity.jsp?plugin_name=identitystoreagent&view=customerIdentity">
-		<#else>
-	<form class="form-horizontal" method="post" action="jsp/admin/plugins/identitystore/agent/ManageCustomerIdentity.jsp?plugin_name=identitystoreagent&action=customerIdentity">
-		</#if>
+    
+	<#assign has_write=false />	
+	<#if identity?has_content>
 		<#assign count_mod=0 />
-		<#list identity_attr_list as attr_key>
+		<#list identity_attr_list as attr_right>
 			<#if count_mod=0>
 		<div class="row">
 			</#if>
 			<div class="col-xs-12 col-sm-5 col-sm-offset-1">
-				<@view_attribute attribute_key=attr_key />
+				<@view_attribute attribute_right=attr_right/>
+				<#if !has_write && attr_right.writable>
+					<#assign has_write=true />					
+				</#if>
 			</div>
 			<#assign count_mod=count_mod+1 />
 			<#if count_mod=2>
@@ -32,9 +35,16 @@
 		<#if count_mod=1>
 		</div>
 		</#if>
-	</form>
-	
 	</#if>
 	
 	</@boxBody>
+	<@boxFooter>
+	<#if has_write && viewMode>
+		<@button type='submit' title='#i18n{portal.util.labelModify}' buttonIcon='pencil' showTitle=true />
+	</#if>
+	<#if has_write && !viewMode>
+		<@button type='submit' title='#i18n{portal.util.labelValidate}' buttonIcon='check' showTitle=true />
+	</#if>
+	</@boxFooter>
+	</@tform>
 </@rowBox>

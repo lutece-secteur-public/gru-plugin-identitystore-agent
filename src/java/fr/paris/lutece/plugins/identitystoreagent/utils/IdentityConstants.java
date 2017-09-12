@@ -36,7 +36,7 @@ package fr.paris.lutece.plugins.identitystoreagent.utils;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
 
 /**
- *
+ * Constants class
  */
 public final class IdentityConstants
 {
@@ -48,9 +48,17 @@ public final class IdentityConstants
             SPLIT_PATTERN );
     public static final String PARAMETER_CONNECTION_ID = "connection_id";
     public static final String PARAMETER_CUSTOMER_ID = "customer_id";
+    public static final String MARK_VIEW_MODE = "viewMode";
     public static final String MARK_IDENTITY = "identity";
     public static final String MARK_MAP_REFERENCE_LIST = "identity_reference_list";
-    public static final String MARK_VIEW_ATTR_LIST = "identity_attr_list";
+    public static final String MARK_ATTR_LIST = "identity_attr_list";
     public static final String IDS_NO_CUSTOMER_ID = "";
     public static final String IDS_NO_CONNECTION_ID = "";
+    
+    /**
+     * private constructor
+     */
+	private IdentityConstants( )
+	{		
+	}
 }

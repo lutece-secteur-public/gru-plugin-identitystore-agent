@@ -52,9 +52,11 @@ import fr.paris.lutece.util.ReferenceList;
 public class IdentityAgentManagementResourceIdService extends ResourceIdService
 {
     public static final String PERMISSION_READ_IDENTITY = "READ_IDENTITY";
+    public static final String PERMISSION_WRITE_IDENTITY = "WRITE_IDENTITY";
     public static final String RESOURCE_TYPE = "IDENTITY_AGENT";
     private static final String PROPERTY_LABEL_RESOURCE_TYPE = "identitystoreagent.identity_agent.resourceType";
     private static final String PROPERTY_LABEL_READ_IDENTITY = "identitystoreagent.identity_agent.permission.label.read";
+    private static final String PROPERTY_LABEL_WRITE_IDENTITY = "identitystoreagent.identity_agent.permission.label.write";
     private static final String ATTR_LABEL_PREFIX = "identitystoreagent.attr_label.";
 
     public IdentityAgentManagementResourceIdService( )
@@ -77,6 +79,11 @@ public class IdentityAgentManagementResourceIdService extends ResourceIdService
         Permission p = new Permission( );
         p.setPermissionKey( PERMISSION_READ_IDENTITY );
         p.setPermissionTitleKey( PROPERTY_LABEL_READ_IDENTITY );
+        rt.registerPermission( p );
+        
+        p = new Permission( );
+        p.setPermissionKey( PERMISSION_WRITE_IDENTITY );
+        p.setPermissionTitleKey( PROPERTY_LABEL_WRITE_IDENTITY );
         rt.registerPermission( p );
 
         ResourceTypeManager.registerResourceType( rt );

@@ -108,9 +108,9 @@ public class IdentityUtilsTest extends LuteceTestCase
     }
 
     @Test
-    public void testGetIdentityForView( )
+    public void testGetIdentity( )
     {
-        IdentityDto identity = IdentityUtils.getIdentityForView( _strConnectionId, _strCustomerId, _user );
+        IdentityDto identity = IdentityUtils.getIdentity( _strConnectionId, _strCustomerId );
         // because appRights is not managed by mock identity shouldn't have attributes
         assertTrue( "attributes map is not empty", identity.getAttributes( ).size( ) == 0 );
     }

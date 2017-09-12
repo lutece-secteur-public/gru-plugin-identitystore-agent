@@ -34,13 +34,21 @@
 package fr.paris.lutece.plugins.identitystoreagent.utils;
 
 import java.util.HashMap;
+import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+
+import fr.paris.lutece.plugins.identitystore.web.rs.dto.AppRightDto;
 import fr.paris.lutece.plugins.identitystore.web.rs.dto.ApplicationRightsDto;
 import fr.paris.lutece.plugins.identitystore.web.rs.dto.AttributeDto;
+import fr.paris.lutece.plugins.identitystore.web.rs.dto.AuthorDto;
+import fr.paris.lutece.plugins.identitystore.web.rs.dto.IdentityChangeDto;
 import fr.paris.lutece.plugins.identitystore.web.rs.dto.IdentityDto;
+import fr.paris.lutece.plugins.identitystore.web.service.AuthorType;
 import fr.paris.lutece.plugins.identitystore.web.service.IdentityService;
 import fr.paris.lutece.portal.business.user.AdminUser;
-import fr.paris.lutece.portal.service.rbac.RBACService;
 import fr.paris.lutece.portal.service.spring.SpringContextService;
 import fr.paris.lutece.portal.service.util.AppException;
 import fr.paris.lutece.portal.service.util.AppLogService;
@@ -53,52 +61,25 @@ public final class IdentityUtils
 {
     private static IdentityService _identityService = (IdentityService) SpringContextService.getBean( "identitystoreagent.identitystore.service" );
     private static String _strApplicationCode = AppPropertiesService.getProperty( "identitystoreagent.application.code" );
-
+    private static String _strApplicationName = AppPropertiesService.getProperty( "identitystoreagent.application.name" );
+    
     /**
-     * Retrieve IdentityDto for the given customer for 'view' purpose
-     * 
-     * @param strConnectionId
-     * @param strCustomerId
-     * @param user
-     * @return IdentityDto
+     * private constructor
      */
-    public static IdentityDto getIdentityForView( String strConnectionId, String strCustomerId, AdminUser user )
+    private IdentityUtils( )
     {
-        return getIdentity( strConnectionId, strCustomerId, user );
     }
 
     /**
-     * Merge IdentityDto from identitystore with Rbac right of the admin user
+     * Retrieve IdentityDto for the given customer
      * 
      * @param strConnectionId
      * @param strCustomerId
-     * @param user
      * @return IdentityDto
      */
-    private static IdentityDto getIdentity( String strConnectionId, String strCustomerId, AdminUser user )
+    public static IdentityDto getIdentity( String strConnectionId, String strCustomerId )
     {
-        IdentityDto identity = null;
-        try
-        {
-            IdentityDto identityFull = _identityService.getIdentity( strConnectionId, strCustomerId, _strApplicationCode );
-            identity = new IdentityDto( );
-            identity.setConnectionId( identityFull.getConnectionId( ) );
-            identity.setCustomerId( identityFull.getCustomerId( ) );
-            identity.setAttributes( new HashMap<>( ) );
-            for ( String strAttrKey : identityFull.getAttributes( ).keySet( ) )
-            {
-                AttributeDto attrDto = (AttributeDto) identityFull.getAttributes( ).get( strAttrKey );
-                if ( RBACService.isAuthorized( "IDENTITY_AGENT", strAttrKey, "READ_IDENTITY", user ) )
-                {
-                    identity.getAttributes( ).put( strAttrKey, attrDto );
-                }
-            }
-        }
-        catch( AppException e )
-        {
-            AppLogService.error( "Unable to merge identity and RBAC " );
-        }
-        return identity;
+        return _identityService.getIdentity( strConnectionId, strCustomerId, _strApplicationCode );
     }
 
     /**
@@ -119,4 +100,76 @@ public final class IdentityUtils
         }
         return appRightsDto;
     }
+
+	/**
+	 * make an updateIdentity from request
+	 * 
+	 * @param _strConnectionId
+	 * @param _strCustomerId
+	 * @param user
+	 * @param listAttributeModify
+	 * @param request
+	 */
+	public static boolean updateIdentity( String strConnectionId, String strCustomerId, AdminUser user, List<AppRightDto> listAttributRight, HttpServletRequest request )
+	{
+		if( listAttributRight == null || listAttributRight.size( ) == 0 )
+		{
+			return false;
+		}
+		IdentityChangeDto identityChange = new IdentityChangeDto( );
+		
+		AuthorDto author = new AuthorDto( );
+		author.setApplicationCode( _strApplicationCode );
+		author.setApplicationCode( _strApplicationName );
+		author.setEmail( user.getEmail( ) );
+		author.setType( AuthorType.TYPE_USER_ADMINISTRATOR.getTypeValue( ) );
+		author.setUserName( user.getLastName( ) + " " + user.getFirstName( ) );
+		identityChange.setAuthor( author );
+		
+		IdentityDto identityBase = getIdentity( strConnectionId, strCustomerId );
+		IdentityDto identityUpdate = new IdentityDto( );
+		identityUpdate.setAttributes( new HashMap<String, AttributeDto>() );
+		if( identityBase != null )
+		{
+			identityUpdate.setConnectionId( identityBase.getConnectionId( ) );
+			identityUpdate.setCustomerId( identityBase.getCustomerId( ) );
+		}
+		if( identityBase.getAttributes( ) != null )
+		{
+			for ( AppRightDto appRight : listAttributRight )
+			{
+				String strAttrKey = appRight.getAttributeKey( );
+				String strNewValue = request.getParameter( strAttrKey );
+				if( strNewValue!=null && appRight.isWritable( ) )
+				{
+					AttributeDto attribute = new AttributeDto( );
+					attribute.setKey( appRight.getAttributeKey( ) );
+					attribute.setValue( strNewValue );
+					if( identityBase.getAttributes( ).containsKey( strAttrKey ) )
+					{
+						// add update only if distinct
+						if( strNewValue!=null && !StringUtils.equals( identityBase.getAttributes( ).get( strAttrKey ).getValue( ), strNewValue ) )
+						{
+							identityUpdate.getAttributes( ).put( strAttrKey, attribute );
+						}
+					}
+					else
+					{
+						identityUpdate.getAttributes( ).put( strAttrKey, attribute );
+					}
+				}
+			}
+		}
+		
+		if( identityUpdate.getAttributes( ).size( )>0)
+		{
+			identityChange.setIdentity( identityUpdate );
+			_identityService.updateIdentity( identityChange, null );
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 }
