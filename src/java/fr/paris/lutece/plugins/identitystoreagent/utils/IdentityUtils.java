@@ -151,7 +151,7 @@ public final class IdentityUtils
                     if ( identityBase.getAttributes( ).containsKey( strAttrKey ) )
                     {
                         // add update only if distinct
-                        if ( strNewValue != null && !StringUtils.equals( identityBase.getAttributes( ).get( strAttrKey ).getValue( ), strNewValue ) )
+                        if ( strNewValue.equals( identityBase.getAttributes( ).get( strAttrKey ).getValue( ) ) )
                         {
                             identityUpdate.getAttributes( ).put( strAttrKey, attribute );
                         }
