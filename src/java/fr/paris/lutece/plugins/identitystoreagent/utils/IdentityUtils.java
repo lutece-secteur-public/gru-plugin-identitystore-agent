@@ -62,7 +62,7 @@ public final class IdentityUtils
     private static IdentityService _identityService = (IdentityService) SpringContextService.getBean( "identitystoreagent.identitystore.service" );
     private static String _strApplicationCode = AppPropertiesService.getProperty( "identitystoreagent.application.code" );
     private static String _strApplicationName = AppPropertiesService.getProperty( "identitystoreagent.application.name" );
-    
+
     /**
      * private constructor
      */
@@ -101,75 +101,76 @@ public final class IdentityUtils
         return appRightsDto;
     }
 
-	/**
-	 * make an updateIdentity from request
-	 * 
-	 * @param _strConnectionId
-	 * @param _strCustomerId
-	 * @param user
-	 * @param listAttributeModify
-	 * @param request
-	 */
-	public static boolean updateIdentity( String strConnectionId, String strCustomerId, AdminUser user, List<AppRightDto> listAttributRight, HttpServletRequest request )
-	{
-		if( listAttributRight == null || listAttributRight.size( ) == 0 )
-		{
-			return false;
-		}
-		IdentityChangeDto identityChange = new IdentityChangeDto( );
-		
-		AuthorDto author = new AuthorDto( );
-		author.setApplicationCode( _strApplicationCode );
-		author.setApplicationCode( _strApplicationName );
-		author.setEmail( user.getEmail( ) );
-		author.setType( AuthorType.TYPE_USER_ADMINISTRATOR.getTypeValue( ) );
-		author.setUserName( user.getLastName( ) + " " + user.getFirstName( ) );
-		identityChange.setAuthor( author );
-		
-		IdentityDto identityBase = getIdentity( strConnectionId, strCustomerId );
-		IdentityDto identityUpdate = new IdentityDto( );
-		identityUpdate.setAttributes( new HashMap<String, AttributeDto>() );
-		if( identityBase != null )
-		{
-			identityUpdate.setConnectionId( identityBase.getConnectionId( ) );
-			identityUpdate.setCustomerId( identityBase.getCustomerId( ) );
-		}
-		if( identityBase.getAttributes( ) != null )
-		{
-			for ( AppRightDto appRight : listAttributRight )
-			{
-				String strAttrKey = appRight.getAttributeKey( );
-				String strNewValue = request.getParameter( strAttrKey );
-				if( strNewValue!=null && appRight.isWritable( ) )
-				{
-					AttributeDto attribute = new AttributeDto( );
-					attribute.setKey( appRight.getAttributeKey( ) );
-					attribute.setValue( strNewValue );
-					if( identityBase.getAttributes( ).containsKey( strAttrKey ) )
-					{
-						// add update only if distinct
-						if( strNewValue!=null && !StringUtils.equals( identityBase.getAttributes( ).get( strAttrKey ).getValue( ), strNewValue ) )
-						{
-							identityUpdate.getAttributes( ).put( strAttrKey, attribute );
-						}
-					}
-					else
-					{
-						identityUpdate.getAttributes( ).put( strAttrKey, attribute );
-					}
-				}
-			}
-		}
-		
-		if( identityUpdate.getAttributes( ).size( )>0)
-		{
-			identityChange.setIdentity( identityUpdate );
-			_identityService.updateIdentity( identityChange, null );
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
+    /**
+     * make an updateIdentity from request
+     * 
+     * @param _strConnectionId
+     * @param _strCustomerId
+     * @param user
+     * @param listAttributeModify
+     * @param request
+     */
+    public static boolean updateIdentity( String strConnectionId, String strCustomerId, AdminUser user, List<AppRightDto> listAttributRight,
+            HttpServletRequest request )
+    {
+        if ( listAttributRight == null || listAttributRight.size( ) == 0 )
+        {
+            return false;
+        }
+        IdentityChangeDto identityChange = new IdentityChangeDto( );
+
+        AuthorDto author = new AuthorDto( );
+        author.setApplicationCode( _strApplicationCode );
+        author.setApplicationCode( _strApplicationName );
+        author.setEmail( user.getEmail( ) );
+        author.setType( AuthorType.TYPE_USER_ADMINISTRATOR.getTypeValue( ) );
+        author.setUserName( user.getLastName( ) + " " + user.getFirstName( ) );
+        identityChange.setAuthor( author );
+
+        IdentityDto identityBase = getIdentity( strConnectionId, strCustomerId );
+        IdentityDto identityUpdate = new IdentityDto( );
+        identityUpdate.setAttributes( new HashMap<String, AttributeDto>( ) );
+        if ( identityBase != null )
+        {
+            identityUpdate.setConnectionId( identityBase.getConnectionId( ) );
+            identityUpdate.setCustomerId( identityBase.getCustomerId( ) );
+        }
+        if ( identityBase.getAttributes( ) != null )
+        {
+            for ( AppRightDto appRight : listAttributRight )
+            {
+                String strAttrKey = appRight.getAttributeKey( );
+                String strNewValue = request.getParameter( strAttrKey );
+                if ( strNewValue != null && appRight.isWritable( ) )
+                {
+                    AttributeDto attribute = new AttributeDto( );
+                    attribute.setKey( appRight.getAttributeKey( ) );
+                    attribute.setValue( strNewValue );
+                    if ( identityBase.getAttributes( ).containsKey( strAttrKey ) )
+                    {
+                        // add update only if distinct
+                        if ( strNewValue != null && !StringUtils.equals( identityBase.getAttributes( ).get( strAttrKey ).getValue( ), strNewValue ) )
+                        {
+                            identityUpdate.getAttributes( ).put( strAttrKey, attribute );
+                        }
+                    }
+                    else
+                    {
+                        identityUpdate.getAttributes( ).put( strAttrKey, attribute );
+                    }
+                }
+            }
+        }
+
+        if ( identityUpdate.getAttributes( ).size( ) > 0 )
+        {
+            identityChange.setIdentity( identityUpdate );
+            _identityService.updateIdentity( identityChange, null );
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 }

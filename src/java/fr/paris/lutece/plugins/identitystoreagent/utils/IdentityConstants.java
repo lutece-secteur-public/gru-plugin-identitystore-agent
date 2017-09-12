@@ -54,11 +54,11 @@ public final class IdentityConstants
     public static final String MARK_ATTR_LIST = "identity_attr_list";
     public static final String IDS_NO_CUSTOMER_ID = "";
     public static final String IDS_NO_CONNECTION_ID = "";
-    
+
     /**
      * private constructor
      */
-	private IdentityConstants( )
-	{		
-	}
+    private IdentityConstants( )
+    {
+    }
 }

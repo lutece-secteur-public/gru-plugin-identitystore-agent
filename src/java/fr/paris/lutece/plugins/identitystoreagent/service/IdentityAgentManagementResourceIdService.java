@@ -80,7 +80,7 @@ public class IdentityAgentManagementResourceIdService extends ResourceIdService
         p.setPermissionKey( PERMISSION_READ_IDENTITY );
         p.setPermissionTitleKey( PROPERTY_LABEL_READ_IDENTITY );
         rt.registerPermission( p );
-        
+
         p = new Permission( );
         p.setPermissionKey( PERMISSION_WRITE_IDENTITY );
         p.setPermissionTitleKey( PROPERTY_LABEL_WRITE_IDENTITY );

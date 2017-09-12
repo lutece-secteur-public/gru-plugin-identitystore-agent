@@ -144,9 +144,9 @@ public class ManageCustomerIdentityJspBean extends MVCAdminJspBean
     public String getCustomerIdentity( HttpServletRequest request )
     {
         initFromRequest( request );
-        if( StringUtils.isEmpty( _strConnectionId ) && StringUtils.isEmpty( _strCustomerId ) )
+        if ( StringUtils.isEmpty( _strConnectionId ) && StringUtils.isEmpty( _strCustomerId ) )
         {
-        	addError( ERROR_IDENTITY_NOT_FOUND, getLocale( ) );
+            addError( ERROR_IDENTITY_NOT_FOUND, getLocale( ) );
             return getPage( PROPERTY_PAGE_TITLE_CUSTOMER_IDENTITY, TEMPLATE_VIEW_CUSTOMER_IDENTITY );
         }
         IdentityDto identityView = IdentityUtils.getIdentity( _strConnectionId, _strCustomerId );
@@ -170,12 +170,12 @@ public class ManageCustomerIdentityJspBean extends MVCAdminJspBean
     @View( value = VIEW_MODIFY_IDENTITY )
     public String getModifyIdentity( HttpServletRequest request )
     {
-    	//check session init
-        if( StringUtils.isEmpty( _strConnectionId ) && StringUtils.isEmpty( _strCustomerId ) )
+        // check session init
+        if ( StringUtils.isEmpty( _strConnectionId ) && StringUtils.isEmpty( _strCustomerId ) )
         {
-        	return getCustomerIdentity( request );
+            return getCustomerIdentity( request );
         }
-        //retrieve identity for modify
+        // retrieve identity for modify
         IdentityDto identityModify = IdentityUtils.getIdentity( _strConnectionId, _strCustomerId );
         if ( identityModify == null )
         {
@@ -197,30 +197,33 @@ public class ManageCustomerIdentityJspBean extends MVCAdminJspBean
     @Action( ACTION_MODIFY_IDENTITY )
     public String doModifyIdentity( HttpServletRequest request )
     {
-    	String strRedirectView = VIEW_CUSTOMER_IDENTITY;
-    	Map<String, String> mapParameters = new HashMap<>( );
-    	//control session is init
-        if( StringUtils.isNotEmpty( _strConnectionId ) || StringUtils.isNotEmpty( _strCustomerId ) )
+        String strRedirectView = VIEW_CUSTOMER_IDENTITY;
+        Map<String, String> mapParameters = new HashMap<>( );
+        // control session is init
+        if ( StringUtils.isNotEmpty( _strConnectionId ) || StringUtils.isNotEmpty( _strCustomerId ) )
         {
-        	mapParameters.put( IdentityConstants.PARAMETER_CONNECTION_ID, _strConnectionId );
-        	mapParameters.put( IdentityConstants.PARAMETER_CUSTOMER_ID, _strCustomerId );
-        	try {
-        		IdentityUtils.updateIdentity( _strConnectionId, _strCustomerId, getUser( ), _listAttributRight, request  );
-        		addInfo( INFO_IDENTITY_UPDATED, getLocale( ) );
-        	}
-        	catch( Exception e )
-        	{
-        		strRedirectView = VIEW_MODIFY_IDENTITY;
-        		addError( ERROR_IDENTITY_LATER, getLocale( ) );
-        	}
+            mapParameters.put( IdentityConstants.PARAMETER_CONNECTION_ID, _strConnectionId );
+            mapParameters.put( IdentityConstants.PARAMETER_CUSTOMER_ID, _strCustomerId );
+            try
+            {
+                IdentityUtils.updateIdentity( _strConnectionId, _strCustomerId, getUser( ), _listAttributRight, request );
+                addInfo( INFO_IDENTITY_UPDATED, getLocale( ) );
+            }
+            catch( Exception e )
+            {
+                strRedirectView = VIEW_MODIFY_IDENTITY;
+                addError( ERROR_IDENTITY_LATER, getLocale( ) );
+            }
         }
-        
+
         return redirect( request, strRedirectView, mapParameters );
     }
 
     /**
      * init model
-     * @param bViewMode true if model is for view
+     * 
+     * @param bViewMode
+     *            true if model is for view
      */
     @Override
     protected Map<String, Object> getModel( )
@@ -228,7 +231,7 @@ public class ManageCustomerIdentityJspBean extends MVCAdminJspBean
         Map<String, Object> model = super.getModel( );
 
         model.put( IdentityConstants.MARK_MAP_REFERENCE_LIST, _mapReferenceList );
-       	model.put( IdentityConstants.MARK_ATTR_LIST, _listAttributRight );
+        model.put( IdentityConstants.MARK_ATTR_LIST, _listAttributRight );
 
         return model;
     }
@@ -254,22 +257,26 @@ public class ManageCustomerIdentityJspBean extends MVCAdminJspBean
         // merge property, application right and RBAC
         if ( _listAttributRight == null )
         {
-        	_listAttributRight = new ArrayList<AppRightDto>( );
+            _listAttributRight = new ArrayList<AppRightDto>( );
             ApplicationRightsDto appRightsDto = IdentityUtils.getApplicationRights( );
             for ( String strAttributeKey : IdentityConstants.PROPERTY_IDS_VIEW_ATTR_LIST )
             {
                 for ( AppRightDto appRight : appRightsDto.getAppRights( ) )
                 {
-                    if ( appRight != null && StringUtils.equals( strAttributeKey, appRight.getAttributeKey( ) )
-                    		&& appRight.isReadable( ) && RBACService.isAuthorized( IdentityAgentManagementResourceIdService.RESOURCE_TYPE, strAttributeKey, IdentityAgentManagementResourceIdService.PERMISSION_READ_IDENTITY, getUser( ) ) )
+                    if ( appRight != null
+                            && StringUtils.equals( strAttributeKey, appRight.getAttributeKey( ) )
+                            && appRight.isReadable( )
+                            && RBACService.isAuthorized( IdentityAgentManagementResourceIdService.RESOURCE_TYPE, strAttributeKey,
+                                    IdentityAgentManagementResourceIdService.PERMISSION_READ_IDENTITY, getUser( ) ) )
                     {
 
-                        if( appRight.isWritable( ) )
+                        if ( appRight.isWritable( ) )
                         {
-                        	appRight.setWritable( RBACService.isAuthorized( IdentityAgentManagementResourceIdService.RESOURCE_TYPE, strAttributeKey, IdentityAgentManagementResourceIdService.PERMISSION_WRITE_IDENTITY, getUser( ) ) );
+                            appRight.setWritable( RBACService.isAuthorized( IdentityAgentManagementResourceIdService.RESOURCE_TYPE, strAttributeKey,
+                                    IdentityAgentManagementResourceIdService.PERMISSION_WRITE_IDENTITY, getUser( ) ) );
                         }
                         _listAttributRight.add( appRight );
-                        	
+
                         break;
                     }
                 }
