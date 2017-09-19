@@ -46,14 +46,17 @@ public final class IdentityConstants
     public static final String PROPERTY_IDS_REFERENCE_LIST_PREFIX_KEY = "identitystoreagent.application.listrefkey.";
     public static final String [ ] PROPERTY_IDS_VIEW_ATTR_LIST = AppPropertiesService.getProperty( "identitystoreagent.ids_view.attribute" ).split(
             SPLIT_PATTERN );
+    public static final String PROPERTY_ATTR_LABEL_PREFIX = "identitystoreagent.attr_label.";
     public static final String PARAMETER_CONNECTION_ID = "connection_id";
     public static final String PARAMETER_CUSTOMER_ID = "customer_id";
+    public static final String PARAMETER_ATTRIBUTE_KEY = "attribute_key";
     public static final String MARK_VIEW_MODE = "viewMode";
     public static final String MARK_IDENTITY = "identity";
     public static final String MARK_MAP_REFERENCE_LIST = "identity_reference_list";
     public static final String MARK_ATTR_LIST = "identity_attr_list";
     public static final String IDS_NO_CUSTOMER_ID = "";
     public static final String IDS_NO_CONNECTION_ID = "";
+    public static final String AGENT_CERTIFIER_CODE = "agentcertifier";
 
     /**
      * private constructor

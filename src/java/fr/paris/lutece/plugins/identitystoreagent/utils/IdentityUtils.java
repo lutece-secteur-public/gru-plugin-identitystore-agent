@@ -35,20 +35,21 @@ package fr.paris.lutece.plugins.identitystoreagent.utils;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang.StringUtils;
 
 import fr.paris.lutece.plugins.identitystore.web.rs.dto.AppRightDto;
 import fr.paris.lutece.plugins.identitystore.web.rs.dto.ApplicationRightsDto;
 import fr.paris.lutece.plugins.identitystore.web.rs.dto.AttributeDto;
 import fr.paris.lutece.plugins.identitystore.web.rs.dto.AuthorDto;
+import fr.paris.lutece.plugins.identitystore.web.rs.dto.CertificateDto;
 import fr.paris.lutece.plugins.identitystore.web.rs.dto.IdentityChangeDto;
 import fr.paris.lutece.plugins.identitystore.web.rs.dto.IdentityDto;
 import fr.paris.lutece.plugins.identitystore.web.service.AuthorType;
 import fr.paris.lutece.plugins.identitystore.web.service.IdentityService;
 import fr.paris.lutece.portal.business.user.AdminUser;
+import fr.paris.lutece.portal.service.i18n.I18nService;
 import fr.paris.lutece.portal.service.spring.SpringContextService;
 import fr.paris.lutece.portal.service.util.AppException;
 import fr.paris.lutece.portal.service.util.AppLogService;
@@ -62,6 +63,9 @@ public final class IdentityUtils
     private static IdentityService _identityService = (IdentityService) SpringContextService.getBean( "identitystoreagent.identitystore.service" );
     private static String _strApplicationCode = AppPropertiesService.getProperty( "identitystoreagent.application.code" );
     private static String _strApplicationName = AppPropertiesService.getProperty( "identitystoreagent.application.name" );
+
+    private static String ERROR_CERTIFIER_UNABLE = "identitystoreagent.error.certifier.unable";
+    private static String ERROR_CERTIFIER_HIGHER = "identitystoreagent.error.certifier.higher_certifier";
 
     /**
      * private constructor
@@ -145,13 +149,14 @@ public final class IdentityUtils
                 String strNewValue = request.getParameter( strAttrKey );
                 if ( strNewValue != null && appRight.isWritable( ) )
                 {
+                    // use of new attribute to remove certificate !
                     AttributeDto attribute = new AttributeDto( );
                     attribute.setKey( appRight.getAttributeKey( ) );
                     attribute.setValue( strNewValue );
                     if ( identityBase.getAttributes( ).containsKey( strAttrKey ) )
                     {
                         // add update only if distinct
-                        if ( strNewValue.equals( identityBase.getAttributes( ).get( strAttrKey ).getValue( ) ) )
+                        if ( !strNewValue.equals( identityBase.getAttributes( ).get( strAttrKey ).getValue( ) ) )
                         {
                             identityUpdate.getAttributes( ).put( strAttrKey, attribute );
                         }
@@ -174,5 +179,58 @@ public final class IdentityUtils
         {
             return false;
         }
+    }
+
+    public static String agentCertification( String strConnectionId, String strCustomerId, AdminUser user, AppRightDto attributeRight, Locale locale )
+    {
+        if ( attributeRight == null || attributeRight.getCertifiers( ) == null
+                || !attributeRight.getCertifiers( ).contains( IdentityConstants.AGENT_CERTIFIER_CODE ) )
+        {
+            return I18nService.getLocalizedString( ERROR_CERTIFIER_UNABLE, locale );
+        }
+        IdentityDto identityBase = getIdentity( strConnectionId, strCustomerId );
+        if ( identityBase == null || identityBase.getAttributes( ) == null || !identityBase.getAttributes( ).containsKey( attributeRight.getAttributeKey( ) ) )
+        {
+            return I18nService.getLocalizedString( ERROR_CERTIFIER_UNABLE, locale );
+        }
+
+        IdentityChangeDto identityChange = new IdentityChangeDto( );
+
+        AuthorDto author = new AuthorDto( );
+        author.setApplicationCode( _strApplicationCode );
+        author.setApplicationCode( _strApplicationName );
+        author.setEmail( user.getEmail( ) );
+        author.setType( AuthorType.TYPE_USER_ADMINISTRATOR.getTypeValue( ) );
+        author.setUserName( user.getLastName( ) + " " + user.getFirstName( ) );
+        identityChange.setAuthor( author );
+
+        IdentityDto identityUpdate = new IdentityDto( );
+        identityUpdate.setAttributes( new HashMap<String, AttributeDto>( ) );
+        identityUpdate.setConnectionId( identityBase.getConnectionId( ) );
+        identityUpdate.setCustomerId( identityBase.getCustomerId( ) );
+        identityUpdate.getAttributes( ).put( attributeRight.getAttributeKey( ), identityBase.getAttributes( ).get( attributeRight.getAttributeKey( ) ) );
+
+        identityChange.setIdentity( identityUpdate );
+        IdentityDto identityCertified = _identityService.certifyAttributes( identityChange, IdentityConstants.AGENT_CERTIFIER_CODE );
+        if ( identityCertified.getAttributes( ) != null && identityCertified.getAttributes( ).containsKey( attributeRight.getAttributeKey( ) ) )
+        {
+            CertificateDto certificate = identityCertified.getAttributes( ).get( attributeRight.getAttributeKey( ) ).getCertificate( );
+            if ( certificate == null )
+            {
+                return I18nService.getLocalizedString( ERROR_CERTIFIER_UNABLE, locale );
+            }
+            else
+                if ( !IdentityConstants.AGENT_CERTIFIER_CODE.equals( certificate.getCertifierCode( ) ) )
+                {
+                    String strAttributeLabel = I18nService.getLocalizedString(
+                            IdentityConstants.PROPERTY_ATTR_LABEL_PREFIX + attributeRight.getAttributeKey( ), locale );
+                    Object [ ] arguments = new Object [ ] {
+                            strAttributeLabel, certificate.getCertifierName( )
+                    };
+                    return I18nService.getLocalizedString( ERROR_CERTIFIER_HIGHER, arguments, locale );
+                }
+        }
+
+        return null;
     }
 }

@@ -40,7 +40,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 import fr.paris.lutece.plugins.identitystore.web.rs.dto.AppRightDto;
 import fr.paris.lutece.plugins.identitystore.web.rs.dto.ApplicationRightsDto;
@@ -48,6 +48,7 @@ import fr.paris.lutece.plugins.identitystore.web.rs.dto.IdentityDto;
 import fr.paris.lutece.plugins.identitystoreagent.service.IdentityAgentManagementResourceIdService;
 import fr.paris.lutece.plugins.identitystoreagent.utils.IdentityConstants;
 import fr.paris.lutece.plugins.identitystoreagent.utils.IdentityUtils;
+import fr.paris.lutece.portal.service.i18n.I18nService;
 import fr.paris.lutece.portal.service.rbac.RBACService;
 import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
@@ -57,6 +58,7 @@ import fr.paris.lutece.portal.util.mvc.commons.annotations.Action;
 import fr.paris.lutece.portal.util.mvc.commons.annotations.View;
 import fr.paris.lutece.util.ReferenceItem;
 import fr.paris.lutece.util.ReferenceList;
+import net.sf.json.JSONObject;
 
 /**
  * Main Controller for manage customer identity for an agent
@@ -70,8 +72,11 @@ public class ManageCustomerIdentityJspBean extends MVCAdminJspBean
     private static final String VIEW_CUSTOMER_IDENTITY = "customerIdentity";
     private static final String VIEW_MODIFY_IDENTITY = "modifyIdentity";
     private static final String ACTION_MODIFY_IDENTITY = "modifyIdentity";
+    private static final String ACTION_CERTIFY_ATTRIBUTE = "certifyAttribute";
+    private static final String ACTION_CERTIFY_ATTRIBUTE_AJAX = "certifyAttributeAjax";
     private static final String INFO_IDENTITY_UPDATED = "identitystoreagent.info.identity.updated";
     private static final String INFO_IDENTITY_NOT_UPDATED = "identitystoreagent.info.identity.not_updated";
+    private static final String INFO_CERTIFIER_OK = "identitystoreagent.info.certifier.ok";
     private static final String ERROR_IDENTITY_NOT_FOUND = "identitystoreagent.error.identity.not_found";
     private static final String ERROR_IDENTITY_LATER = "identitystoreagent.error.identity.later";
     private static final long serialVersionUID = 1L;
@@ -193,7 +198,7 @@ public class ManageCustomerIdentityJspBean extends MVCAdminJspBean
      * modify identity action
      * 
      * @param request
-     * @return redirect to view
+     * @return redirect to default view
      */
     @Action( ACTION_MODIFY_IDENTITY )
     public String doModifyIdentity( HttpServletRequest request )
@@ -225,6 +230,93 @@ public class ManageCustomerIdentityJspBean extends MVCAdminJspBean
         }
 
         return redirect( request, strRedirectView, mapParameters );
+    }
+
+    /**
+     * Certification action, return message in default after certification try
+     * 
+     * @param request
+     * @return redirect to default view
+     */
+    @Action( ACTION_CERTIFY_ATTRIBUTE )
+    public String doCertifyAttribute( HttpServletRequest request )
+    {
+        Map<String, String> mapParameters = new HashMap<>( );
+        // control session is init
+        if ( StringUtils.isNotEmpty( _strConnectionId ) || StringUtils.isNotEmpty( _strCustomerId ) )
+        {
+            mapParameters.put( IdentityConstants.PARAMETER_CONNECTION_ID, _strConnectionId );
+            mapParameters.put( IdentityConstants.PARAMETER_CUSTOMER_ID, _strCustomerId );
+            String strAttributeKey = request.getParameter( IdentityConstants.PARAMETER_ATTRIBUTE_KEY );
+            AppRightDto attributeRight = null;
+            for ( AppRightDto appRightDto : _listAttributRight )
+            {
+                if ( appRightDto.getAttributeKey( ).equals( strAttributeKey ) )
+                {
+                    attributeRight = appRightDto;
+                    break;
+                }
+            }
+            String strAttributeLabel = I18nService.getLocalizedString( IdentityConstants.PROPERTY_ATTR_LABEL_PREFIX + strAttributeKey, getLocale( ) );
+            String strCertifierResult = IdentityUtils.agentCertification( _strConnectionId, _strCustomerId, getUser( ), attributeRight, getLocale( ) );
+            if ( strCertifierResult == null )
+            {
+                addInfo( I18nService.getLocalizedString( INFO_CERTIFIER_OK, new Object [ ] {
+                    strAttributeLabel
+                }, getLocale( ) ) );
+            }
+            else
+            {
+                addError( strCertifierResult );
+            }
+        }
+
+        return redirect( request, VIEW_CUSTOMER_IDENTITY, mapParameters );
+    }
+
+    /**
+     * same as doCertifyAttribute, but return JSON for Ajax request
+     * 
+     * @param request
+     * @return JSON
+     */
+    @Action( ACTION_CERTIFY_ATTRIBUTE_AJAX )
+    public String doCertifyAttributeAjax( HttpServletRequest request )
+    {
+        JSONObject json = new JSONObject( );
+        String strMessage = null;
+        String strAttributeKey = request.getParameter( IdentityConstants.PARAMETER_ATTRIBUTE_KEY );
+        String strAttributeLabel = I18nService.getLocalizedString( IdentityConstants.PROPERTY_ATTR_LABEL_PREFIX + strAttributeKey, getLocale( ) );
+
+        if ( StringUtils.isNotEmpty( _strConnectionId ) || StringUtils.isNotEmpty( _strCustomerId ) )
+        {
+            AppRightDto attributeRight = null;
+            for ( AppRightDto appRightDto : _listAttributRight )
+            {
+                if ( appRightDto.getAttributeKey( ).equals( strAttributeKey ) )
+                {
+                    attributeRight = appRightDto;
+                    break;
+                }
+            }
+            strMessage = IdentityUtils.agentCertification( _strConnectionId, _strCustomerId, getUser( ), attributeRight, getLocale( ) );
+        }
+
+        if ( strMessage == null )
+        {
+            strMessage = I18nService.getLocalizedString( INFO_CERTIFIER_OK, new Object [ ] {
+                strAttributeLabel
+            }, getLocale( ) );
+            json.put( "status", "success" );
+            json.put( "message", strMessage );
+        }
+        else
+        {
+            json.put( "status", "error" );
+            json.put( "message", strMessage );
+        }
+
+        return json.toString( );
     }
 
     /**
@@ -283,8 +375,14 @@ public class ManageCustomerIdentityJspBean extends MVCAdminJspBean
                             appRight.setWritable( RBACService.isAuthorized( IdentityAgentManagementResourceIdService.RESOURCE_TYPE, strAttributeKey,
                                     IdentityAgentManagementResourceIdService.PERMISSION_WRITE_IDENTITY, getUser( ) ) );
                         }
-                        _listAttributRight.add( appRight );
+                        List<String> listCertifiers = new ArrayList<>( );
+                        if ( appRight.getCertifiers( ) != null && appRight.getCertifiers( ).contains( IdentityConstants.AGENT_CERTIFIER_CODE ) )
+                        {
+                            listCertifiers.add( IdentityConstants.AGENT_CERTIFIER_CODE );
+                        }
+                        appRight.setCertifiers( listCertifiers );
 
+                        _listAttributRight.add( appRight );
                         break;
                     }
                 }

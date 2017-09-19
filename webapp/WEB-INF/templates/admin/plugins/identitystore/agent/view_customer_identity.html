@@ -10,8 +10,10 @@
 	</#if>
 	<@tform action=formAction>
 	<@boxBody>    
+	<div id="messages_box">
     <@messages errors=errors />
     <@messages infos=infos />
+	</div>
     
 	<#assign has_write=false />	
 	<#if identity?has_content>
@@ -48,3 +50,48 @@
 	</@boxFooter>
 	</@tform>
 </@rowBox>
+
+<script type="text/javascript">
+$(".certif_agent").click(function(e){
+	// direct link
+	location.href = "jsp/admin/plugins/identitystore/agent/ManageCustomerIdentity.jsp?plugin_name=identitystoreagent&action=certifyAttribute&attribute_key="+$(this).val();
+	// ajax
+	// certifAgent($(this).val());
+});
+
+function certifAgent( attributeKey ) {
+	$.ajax({
+		url : 'jsp/admin/plugins/identitystore/agent/AgentCertification.jsp?plugin_name=identitystoreagent&action=certifyAttributeAjax',
+		type: 'GET',
+		dataType: "json",
+		data: { attribute_key : attributeKey },
+		async: false,
+	    cache:false,
+        success:function(result) {
+			if ( result.status == 'success'){
+				if( $("#messages_infos_div").length )
+				{
+					$("#messages_infos_div").append(result.message+"<br/>");
+				}
+				else
+				{
+					$("#messages_box").append( "<div class='alert alert-info' id='messages_infos_div'><a class='close' data-dismiss='alert' href='#'>x</a> "+result.message+"<br/></div>");
+				}
+    		}
+			else if(result.status =='error')
+    		{
+				if( $("#messages_errors_div").length )
+				{
+					$("#messages_errors_div").append(result.message+"<br/>");
+				}
+				else
+				{
+					$("#messages_box").append( "<div class='alert alert-error' id='messages_errors_div'><a class='close' data-dismiss='alert' href='#'>x</a> "+result.message+"<br/></div>");
+				}
+    		}
+		}
+		,
+        error: function(jqXHR, textStatus, errorThrown) { }
+	});
+}
+</script>

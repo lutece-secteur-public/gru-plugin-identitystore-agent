@@ -38,6 +38,7 @@ import java.util.Locale;
 import fr.paris.lutece.plugins.identitystore.web.rs.dto.AppRightDto;
 import fr.paris.lutece.plugins.identitystore.web.rs.dto.ApplicationRightsDto;
 import fr.paris.lutece.plugins.identitystoreagent.IdentityStoreAgentPlugin;
+import fr.paris.lutece.plugins.identitystoreagent.utils.IdentityConstants;
 import fr.paris.lutece.plugins.identitystoreagent.utils.IdentityUtils;
 import fr.paris.lutece.portal.service.i18n.I18nService;
 import fr.paris.lutece.portal.service.rbac.Permission;
@@ -57,7 +58,6 @@ public class IdentityAgentManagementResourceIdService extends ResourceIdService
     private static final String PROPERTY_LABEL_RESOURCE_TYPE = "identitystoreagent.identity_agent.resourceType";
     private static final String PROPERTY_LABEL_READ_IDENTITY = "identitystoreagent.identity_agent.permission.label.read";
     private static final String PROPERTY_LABEL_WRITE_IDENTITY = "identitystoreagent.identity_agent.permission.label.write";
-    private static final String ATTR_LABEL_PREFIX = "identitystoreagent.attr_label.";
 
     public IdentityAgentManagementResourceIdService( )
     {
@@ -101,7 +101,8 @@ public class IdentityAgentManagementResourceIdService extends ResourceIdService
         {
             for ( AppRightDto appRight : appRights.getAppRights( ) )
             {
-                refList.addItem( appRight.getAttributeKey( ), I18nService.getLocalizedString( ATTR_LABEL_PREFIX + appRight.getAttributeKey( ), locale ) );
+                refList.addItem( appRight.getAttributeKey( ),
+                        I18nService.getLocalizedString( IdentityConstants.PROPERTY_ATTR_LABEL_PREFIX + appRight.getAttributeKey( ), locale ) );
             }
         }
         return refList;
@@ -113,7 +114,7 @@ public class IdentityAgentManagementResourceIdService extends ResourceIdService
     @Override
     public String getTitle( String strId, Locale locale )
     {
-        return I18nService.getLocalizedString( ATTR_LABEL_PREFIX + strId, locale );
+        return I18nService.getLocalizedString( IdentityConstants.PROPERTY_ATTR_LABEL_PREFIX + strId, locale );
     }
 
 }

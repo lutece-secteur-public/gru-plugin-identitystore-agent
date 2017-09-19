@@ -1,10 +1,14 @@
-<#macro view_attribute attribute_right>
+<#macro view_attribute attribute_right class_certif="certif_agent">
 	<#assign attribute_key = attribute_right.attributeKey/>
-	<#if identity.attributes[attribute_key]?has_content>
-		<#assign attribute = identity.attributes[attribute_key] />
-	<div class="form-group">
+	<div class="row">
+		<div class="col-xs-12">
 		<label class="control-label" for="${attribute_key}" >#i18n{identitystoreagent.attr_label.${attribute_key}} :</label>
-		
+		</div>
+	</div>
+	<div class="form-group row">
+	<#if identity.attributes[attribute_key]?has_content>
+		<#assign attribute = identity.attributes[attribute_key] />	
+		<div class="col-xs-10">	
 		<#if identity_reference_list[attribute_key]?has_content>
 			<#if viewMode || ! attribute_right.writable>
 				<@comboWithParams name=attribute_key default_value=attribute.value additionalParameters=" id=\"attribute_key\" class=\"form-control\" disabled" items=identity_reference_list[attribute_key] />
@@ -17,11 +21,14 @@
 		<#if attribute.certificate?has_content >
         <span><i class="fa fa-check-circle fa-lg" style="color:green"></i> #i18n{identitystoreagent.certificate.certified_by} ${attribute.certificate.certifierName!''} <#if attribute.certificate.certificateExpirationDate??> #i18n{identitystoreagent.certificate.until} : ${attribute.certificate.certificateExpirationDate?date!''}</#if></span>
         </#if>
-    </div>
+		</div>
+		<#if viewMode && attribute_right.certifiers?has_content>
+		<div class="col-xs-2">
+			<@button title='Certifier' buttonIcon='certificate' showTitle=false class=class_certif value="${attribute_key}"/>
+		</div>
+		</#if>
     <#else>
-	<div class="form-group">
-		<label class="control-label" for="${attribute_key}" >#i18n{identitystoreagent.attr_label.${attribute_key}} :</label>
-		
+		<div class="col-xs-10">		
 		<#if identity_reference_list[attribute_key]?has_content>
 			<#if viewMode || ! attribute_right.writable>
 				<@comboWithParams name=attribute_key default_value="" additionalParameters=" id=\"attribute_key\" class=\"form-control\" disabled" items=identity_reference_list[attribute_key] />
@@ -31,6 +38,12 @@
 		<#else>
 			<input class="form-control input-sm" type="text" id="${attribute_key}" name="${attribute_key}" value="" <#if viewMode || ! attribute_right.writable>readonly</#if>>
 		</#if>
-    </div>    	
-    </#if>         
+		</div>
+		<#if viewMode && attribute_right.certifiers?has_content>
+		<div class="col-xs-2">
+			<@button title='Certifier' buttonIcon='certificate' showTitle=false class=class_certif value="${attribute_key}"/>
+		</div>
+		</#if>
+    </#if>   
+    </div>      
 </#macro>
