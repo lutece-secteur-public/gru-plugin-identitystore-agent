@@ -359,31 +359,35 @@ public class ManageCustomerIdentityJspBean extends MVCAdminJspBean
         {
             _listAttributRight = new ArrayList<AppRightDto>( );
             ApplicationRightsDto appRightsDto = IdentityUtils.getApplicationRights( );
-            for ( String strAttributeKey : IdentityConstants.PROPERTY_IDS_VIEW_ATTR_LIST )
+
+            if ( appRightsDto != null )
             {
-                for ( AppRightDto appRight : appRightsDto.getAppRights( ) )
+                for ( String strAttributeKey : IdentityConstants.PROPERTY_IDS_VIEW_ATTR_LIST )
                 {
-                    if ( appRight != null
-                            && StringUtils.equals( strAttributeKey, appRight.getAttributeKey( ) )
-                            && appRight.isReadable( )
-                            && RBACService.isAuthorized( IdentityAgentManagementResourceIdService.RESOURCE_TYPE, strAttributeKey,
-                                    IdentityAgentManagementResourceIdService.PERMISSION_READ_IDENTITY, getUser( ) ) )
+                    for ( AppRightDto appRight : appRightsDto.getAppRights( ) )
                     {
-
-                        if ( appRight.isWritable( ) )
+                        if ( appRight != null
+                                && StringUtils.equals( strAttributeKey, appRight.getAttributeKey( ) )
+                                && appRight.isReadable( )
+                                && RBACService.isAuthorized( IdentityAgentManagementResourceIdService.RESOURCE_TYPE, strAttributeKey,
+                                        IdentityAgentManagementResourceIdService.PERMISSION_READ_IDENTITY, getUser( ) ) )
                         {
-                            appRight.setWritable( RBACService.isAuthorized( IdentityAgentManagementResourceIdService.RESOURCE_TYPE, strAttributeKey,
-                                    IdentityAgentManagementResourceIdService.PERMISSION_WRITE_IDENTITY, getUser( ) ) );
-                        }
-                        List<String> listCertifiers = new ArrayList<>( );
-                        if ( appRight.getCertifiers( ) != null && appRight.getCertifiers( ).contains( IdentityConstants.AGENT_CERTIFIER_CODE ) )
-                        {
-                            listCertifiers.add( IdentityConstants.AGENT_CERTIFIER_CODE );
-                        }
-                        appRight.setCertifiers( listCertifiers );
 
-                        _listAttributRight.add( appRight );
-                        break;
+                            if ( appRight.isWritable( ) )
+                            {
+                                appRight.setWritable( RBACService.isAuthorized( IdentityAgentManagementResourceIdService.RESOURCE_TYPE, strAttributeKey,
+                                        IdentityAgentManagementResourceIdService.PERMISSION_WRITE_IDENTITY, getUser( ) ) );
+                            }
+                            List<String> listCertifiers = new ArrayList<>( );
+                            if ( appRight.getCertifiers( ) != null && appRight.getCertifiers( ).contains( IdentityConstants.AGENT_CERTIFIER_CODE ) )
+                            {
+                                listCertifiers.add( IdentityConstants.AGENT_CERTIFIER_CODE );
+                            }
+                            appRight.setCertifiers( listCertifiers );
+
+                            _listAttributRight.add( appRight );
+                            break;
+                        }
                     }
                 }
             }
