@@ -62,7 +62,6 @@ public final class IdentityUtils
 {
     private static IdentityService _identityService = (IdentityService) SpringContextService.getBean( "identitystoreagent.identitystore.service" );
     private static String _strApplicationCode = AppPropertiesService.getProperty( "identitystoreagent.application.code" );
-    private static String _strApplicationName = AppPropertiesService.getProperty( "identitystoreagent.application.name" );
 
     private static String ERROR_CERTIFIER_UNABLE = "identitystoreagent.error.certifier.unable";
     private static String ERROR_CERTIFIER_HIGHER = "identitystoreagent.error.certifier.higher_certifier";
@@ -125,10 +124,8 @@ public final class IdentityUtils
 
         AuthorDto author = new AuthorDto( );
         author.setApplicationCode( _strApplicationCode );
-        author.setApplicationCode( _strApplicationName );
-        author.setEmail( user.getEmail( ) );
+        author.setId( user.getEmail( ) );
         author.setType( AuthorType.TYPE_USER_ADMINISTRATOR.getTypeValue( ) );
-        author.setUserName( user.getLastName( ) + " " + user.getFirstName( ) );
         identityChange.setAuthor( author );
 
         IdentityDto identityBase = getIdentity( strConnectionId, strCustomerId );
@@ -198,20 +195,22 @@ public final class IdentityUtils
 
         AuthorDto author = new AuthorDto( );
         author.setApplicationCode( _strApplicationCode );
-        author.setApplicationCode( _strApplicationName );
-        author.setEmail( user.getEmail( ) );
+        author.setId( user.getEmail( ) );
         author.setType( AuthorType.TYPE_USER_ADMINISTRATOR.getTypeValue( ) );
-        author.setUserName( user.getLastName( ) + " " + user.getFirstName( ) );
         identityChange.setAuthor( author );
 
         IdentityDto identityUpdate = new IdentityDto( );
         identityUpdate.setAttributes( new HashMap<String, AttributeDto>( ) );
         identityUpdate.setConnectionId( identityBase.getConnectionId( ) );
         identityUpdate.setCustomerId( identityBase.getCustomerId( ) );
-        identityUpdate.getAttributes( ).put( attributeRight.getAttributeKey( ), identityBase.getAttributes( ).get( attributeRight.getAttributeKey( ) ) );
+        AttributeDto attributeCertify = identityBase.getAttributes( ).get( attributeRight.getAttributeKey( ) );
+        CertificateDto certificateDto = new CertificateDto( );
+        certificateDto.setCertifierCode( IdentityConstants.AGENT_CERTIFIER_CODE );
+        attributeCertify.setCertificate( certificateDto );
+        identityUpdate.getAttributes( ).put( attributeRight.getAttributeKey( ), attributeCertify );
 
         identityChange.setIdentity( identityUpdate );
-        IdentityDto identityCertified = _identityService.certifyAttributes( identityChange, IdentityConstants.AGENT_CERTIFIER_CODE );
+        IdentityDto identityCertified = _identityService.updateIdentity( identityChange, new HashMap<>( ) );
         if ( identityCertified.getAttributes( ) != null && identityCertified.getAttributes( ).containsKey( attributeRight.getAttributeKey( ) ) )
         {
             CertificateDto certificate = identityCertified.getAttributes( ).get( attributeRight.getAttributeKey( ) ).getCertificate( );

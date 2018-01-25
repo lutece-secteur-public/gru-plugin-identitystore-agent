@@ -11,7 +11,7 @@ This plugin give some AdminFeature to agents for managing user profile.
 
 In `identitystoreagent.properties` , configuration have to be done for :
  
-* The application declared in identitystore referencial with 'identitystoreagent.application.code' and 'identitystoreagent.application.name'
+* The application declared in identitystore referencial with 'identitystoreagent.application.code'
 * The list of available attribute's key for dislay / update purpose in 'identitystoreagent.ids_view.attribute'
 * For attributes with list of values, 'identitystoreagent.application.listref' and linked parameter have to be set (check example in the file)
 

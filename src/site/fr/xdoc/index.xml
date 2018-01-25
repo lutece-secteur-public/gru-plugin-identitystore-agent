@@ -19,7 +19,7 @@
                 <p>
                 Dans <code>identitystoreagent.properties</code>, il faut configurer :
                 <ul>
-                    <li>L'application déclaré dans le référentiel identitystore via 'identitystoreagent.application.code' et 'identitystoreagent.application.name'</li>
+                    <li>L'application déclaré dans le référentiel identitystore via 'identitystoreagent.application.code'</li>
                     <li>La liste des clés d'attributs que l'on souhaite pouvoir visualiser / modifier dans 'identitystoreagent.ids_view.attribute'</li>
                     <li>Pour les attributs utilisant des listes de valeurs, il faut renseigner 'identitystoreagent.application.listref' et les autres paramètres liés (voir exemple dans le fichier)</li>
                 </ul> 

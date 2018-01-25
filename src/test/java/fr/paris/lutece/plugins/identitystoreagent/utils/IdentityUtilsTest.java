@@ -84,10 +84,8 @@ public class IdentityUtilsTest extends LuteceTestCase
         // add one identity in mock
         AuthorDto author = new AuthorDto( );
         author.setApplicationCode( "IDS_AGENT" );
-        author.setApplicationName( "IDS_AGENT" );
-        author.setEmail( "strEmail" );
+        author.setId( "strEmail" );
         author.setType( AuthorType.TYPE_APPLICATION.getTypeValue( ) );
-        author.setUserName( "strUserName" );
 
         IdentityDto identity = new IdentityDto( );
         identity.setConnectionId( _strConnectionId );
